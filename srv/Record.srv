@@ -1,0 +1,7 @@
+
+bool start
+string[] topics
+string data_directory
+
+---
+bool success
