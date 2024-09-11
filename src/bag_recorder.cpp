@@ -1,4 +1,5 @@
 #include "bag_recorder_2/bag_recorder.hpp"
+#include <fstream>
 
 using namespace std::placeholders;
 
@@ -13,7 +14,7 @@ void BagRecorder::trigger_recording(const std::shared_ptr<bag_recorder_2::srv::R
                                           std::shared_ptr<bag_recorder_2::srv::Record::Response> response) {
 
   if (request->start && !is_recording_) {
-    start_recording(request->topics, request->data_directory);
+    start_recording(request->config_file, request->data_directory);
     response->success = true;
   } else if (!request->start && is_recording_) {
     stop_recording();
@@ -23,7 +24,7 @@ void BagRecorder::trigger_recording(const std::shared_ptr<bag_recorder_2::srv::R
   }
 }
 
-void BagRecorder::start_recording(std::vector<std::string> topics, std::string data_directory)
+void BagRecorder::start_recording(std::string config, std::string data_directory)
 {
   RCLCPP_INFO(this->get_logger(), "Requesting start recording");
   if (is_recording_) {
@@ -34,7 +35,8 @@ void BagRecorder::start_recording(std::vector<std::string> topics, std::string d
   rosbag2_transport::RecordOptions record_options;
   record_options.rmw_serialization_format = std::string(rmw_get_serialization_format());
   record_options.all = false;  // Set to false to record specific topics
-  record_options.topics = topics;  // List the topics to record
+
+  load_config(config, record_options.topics);
 
   rosbag2_storage::StorageOptions storage_options;
   storage_options.uri = data_directory + "/bag_" + get_time_str();
@@ -65,6 +67,44 @@ void BagRecorder::stop_recording()
 
   RCLCPP_INFO(this->get_logger(), "Stopped recording.");
   is_recording_ = false;
+}
+
+bool BagRecorder::load_config(std::string config_file, std::vector<std::string>& topics, std::set<std::string> loaded) {
+    std::ifstream fd(config_file.c_str());
+    std::string line;
+
+    //prevent circular references in config linking
+    if(loaded.find(config_file) == loaded.end()) {
+        loaded.insert(config_file);
+    } else {
+        RCLCPP_WARN(this->get_logger(), "%s config loaded already, circular reference detected.", config_file.c_str());
+        return false;
+    }
+
+    if( !fd ) {
+      RCLCPP_WARN(this->get_logger(), "Linked config: %s is invalid.", config_file.c_str());
+      return false;
+    } else {
+        while( std::getline(fd,line) ) {
+            //ignore blank or lines starting with space or #
+            if(line == "" || line.substr(0,1) == " " || line.substr(0,1) == "#")
+                continue;
+            //link to other config files :P
+            //interesting but I doubt it's usefullness
+            if(line.substr(0,1) == "$") {
+                load_config(line.substr(1), topics, loaded);
+                continue;
+            }
+            topics.push_back(sanitize_topic(line));
+        }
+        return true;
+    }
+}
+
+std::string BagRecorder::sanitize_topic(std::string topic) {
+    if(topic.substr(0,1) != "/")
+        topic = "/" + topic;
+    return topic;
 }
 
 std::string BagRecorder::get_time_str()

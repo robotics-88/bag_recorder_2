@@ -1,6 +1,6 @@
 
 bool start
-string[] topics
+string config_file
 string data_directory
 
 ---
