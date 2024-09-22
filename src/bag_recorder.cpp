@@ -39,6 +39,7 @@ void BagRecorder::start_recording(std::string config, std::string data_directory
   load_config(config, record_options.topics);
 
   rosbag2_storage::StorageOptions storage_options;
+  storage_options.storage_id = "mcap";
   storage_options.uri = data_directory + "/bag_" + get_time_str();
   storage_options.max_bagfile_duration = 60;
 
