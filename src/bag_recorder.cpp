@@ -41,7 +41,7 @@ void BagRecorder::start_recording(std::string config, std::string data_directory
   rosbag2_storage::StorageOptions storage_options;
   storage_options.storage_id = "mcap";
   storage_options.uri = data_directory + "/bag_" + get_time_str();
-  storage_options.max_bagfile_duration = 60;
+  // storage_options.max_bagfile_duration = 60;
 
   // Recorder will be started
   auto writer = rosbag2_transport::ReaderWriterFactory::make_writer(record_options);
