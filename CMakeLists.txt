@@ -41,6 +41,10 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
 target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME}__rosidl_typesupport_cpp)
 
 

@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="bag_recorder_2" exec="bag_recorder_2_node" output="screen"/>
+</launch>

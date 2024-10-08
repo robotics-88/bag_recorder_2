@@ -14,9 +14,11 @@ private:
     rclcpp::Service<bag_recorder_2::srv::Record>::SharedPtr record_service_;
     void trigger_recording(const std::shared_ptr<bag_recorder_2::srv::Record::Request> request,
                                  std::shared_ptr<bag_recorder_2::srv::Record::Response> response);
-    void start_recording(std::vector<std::string> topics, std::string data_directory);
+    void start_recording(std::string config_file, std::string data_directory);
     void stop_recording();
 
+    bool load_config(std::string config_name, std::vector<std::string>& topics, std::set<std::string> loaded = std::set<std::string>());
+    std::string sanitize_topic(std::string topic);
     std::string get_time_str();
 
     bool is_recording_;
