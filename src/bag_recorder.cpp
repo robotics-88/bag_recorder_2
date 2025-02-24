@@ -40,8 +40,7 @@ void BagRecorder::start_recording(std::string config, std::string data_directory
 
   rosbag2_storage::StorageOptions storage_options;
   storage_options.storage_id = "mcap";
-  storage_options.uri = data_directory + "/bag_" + get_time_str();
-  // storage_options.max_bagfile_duration = 60;
+  storage_options.uri = data_directory + "/bag";
 
   // Recorder will be started
   auto writer = rosbag2_transport::ReaderWriterFactory::make_writer(record_options);
@@ -106,16 +105,6 @@ std::string BagRecorder::sanitize_topic(std::string topic) {
     if(topic.substr(0,1) != "/")
         topic = "/" + topic;
     return topic;
-}
-
-std::string BagRecorder::get_time_str()
-{
-  auto now = std::chrono::system_clock::now();
-  std::time_t now_time = std::chrono::system_clock::to_time_t(now);
-  std::tm now_tm = *std::localtime(&now_time);
-  std::stringstream ss;
-  ss << std::put_time(&now_tm, "%Y-%m-%d_%H-%M-%S");
-  return ss.str();
 }
 
 int main(int argc, char * argv[])

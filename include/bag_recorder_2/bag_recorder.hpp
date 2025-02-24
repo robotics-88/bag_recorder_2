@@ -19,7 +19,6 @@ private:
 
     bool load_config(std::string config_name, std::vector<std::string>& topics, std::set<std::string> loaded = std::set<std::string>());
     std::string sanitize_topic(std::string topic);
-    std::string get_time_str();
 
     bool is_recording_;
     std::shared_ptr<rosbag2_transport::Recorder> recorder_;
